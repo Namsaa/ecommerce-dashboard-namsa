@@ -24,7 +24,6 @@ def create_state_revenue_df(df):
     return state_revenue_df
 
 def create_delivery_status_df(df):
-
     df["order_purchase_timestamp"] = pd.to_datetime(df["order_purchase_timestamp"])
     df["order_delivered_customer_date"] = pd.to_datetime(df["order_delivered_customer_date"])
     df["order_estimated_delivery_date"] = pd.to_datetime(df["order_estimated_delivery_date"])
@@ -96,32 +95,32 @@ tab1, tab2, tab3 = st.tabs(["🎯 Performa Pelanggan (RFM)", "🗺️ Geoanalisi
 
 with tab1:
     st.subheader("Best Customers Based on RFM Parameters")
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(35, 15))
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(30, 10))
     colors = ["#72BCD4", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
     if not rfm_df.empty:
         sns.barplot(y="recency", x="short_id", data=rfm_df.sort_values(by="recency", ascending=True).head(5), palette=colors, ax=ax[0])
         ax[0].set_ylabel(None)
-        ax[0].set_xlabel("Customer ID", fontsize=30)
-        ax[0].set_title("By Recency (days)", loc="center", fontsize=50)
-        ax[0].tick_params(axis='x', labelsize=30, rotation=45)
-        ax[0].tick_params(axis='y', labelsize=30)
+        ax[0].set_xlabel("Customer ID", fontsize=20)
+        ax[0].set_title("By Recency (days)", loc="center", fontsize=30)
+        ax[0].tick_params(axis='x', labelsize=15, rotation=45)
+        ax[0].tick_params(axis='y', labelsize=15)
 
         sns.barplot(y="frequency", x="short_id", data=rfm_df.sort_values(by="frequency", ascending=False).head(5), palette=colors, ax=ax[1])
         ax[1].set_ylabel(None)
-        ax[1].set_xlabel("Customer ID", fontsize=30)
-        ax[1].set_title("By Frequency", loc="center", fontsize=50)
-        ax[1].tick_params(axis='x', labelsize=30, rotation=45)
-        ax[1].tick_params(axis='y', labelsize=30)
+        ax[1].set_xlabel("Customer ID", fontsize=20)
+        ax[1].set_title("By Frequency", loc="center", fontsize=30)
+        ax[1].tick_params(axis='x', labelsize=15, rotation=45)
+        ax[1].tick_params(axis='y', labelsize=15)
 
         sns.barplot(y="monetary", x="short_id", data=rfm_df.sort_values(by="monetary", ascending=False).head(5), palette=colors, ax=ax[2])
         ax[2].set_ylabel(None)
-        ax[2].set_xlabel("Customer ID", fontsize=30)
-        ax[2].set_title("By Monetary", loc="center", fontsize=50)
-        ax[2].tick_params(axis='x', labelsize=30, rotation=45)
-        ax[2].tick_params(axis='y', labelsize=30)
+        ax[2].set_xlabel("Customer ID", fontsize=20)
+        ax[2].set_title("By Monetary", loc="center", fontsize=30)
+        ax[2].tick_params(axis='x', labelsize=15, rotation=45)
+        ax[2].tick_params(axis='y', labelsize=15)
 
-        st.pyplot(fig, use_container_width=False)
+        st.pyplot(fig, use_container_width=True)
         
         with st.expander("Lihat Penjelasan & Rekomendasi Bisnis (RFM)"):
             st.write("""
@@ -174,28 +173,48 @@ with tab3:
     st.subheader("Performa Pengiriman Pesanan (Actual vs Estimated)")
     
     if not delivery_stats_df.empty:
-        fig3, ax3 = plt.subplots(figsize=(12, 6))
-        colors_delivery = ["#72BCD4", "#D9534F", "#D3D3D3"]
+        # Layout 2 kolom untuk Bar Chart dan Pie Chart di Tab 3
+        col_c1, col_c2 = st.columns(2)
+        
+        with col_c1:
+            st.markdown("##### Jumlah Pesanan Berdasarkan Status")
+            fig3, ax3 = plt.subplots(figsize=(8, 6))
+            colors_delivery = ["#72BCD4", "#D9534F", "#D3D3D3"]
 
-        sns.barplot(
-            x="Status Pengiriman",
-            y="Jumlah Pesanan",
-            data=delivery_stats_df,
-            palette=colors_delivery,
-            ax=ax3
-        )
-        ax3.set_ylabel("Jumlah Pesanan", fontsize=12)
-        ax3.set_xlabel("Status Pengiriman", fontsize=12)
-        st.pyplot(fig3, use_container_width=True)
+            sns.barplot(
+                x="Status Pengiriman",
+                y="Jumlah Pesanan",
+                data=delivery_stats_df,
+                palette=colors_delivery,
+                ax=ax3
+            )
+            ax3.set_ylabel("Jumlah Pesanan", fontsize=12)
+            ax3.set_xlabel("Status Pengiriman", fontsize=12)
+            st.pyplot(fig3, use_container_width=True)
+            
+        with col_c2:
+            st.markdown("##### Persentase Ketepatan Waktu Pengiriman")
+            fig_pie, ax_pie = plt.subplots(figsize=(8, 6))
+            colors_pie = ["#72BCD4", "#FF7276", "#D3D3D3"]
+            
+            ax_pie.pie(
+                delivery_stats_df['Jumlah Pesanan'], 
+                labels=delivery_stats_df['Status Pengiriman'], 
+                autopct='%1.1f%%', 
+                colors=colors_pie[:len(delivery_stats_df)], 
+                startangle=90
+            )
+            ax_pie.axis('equal')
+            st.pyplot(fig_pie, use_container_width=True)
         
         with st.expander("Lihat Penjelasan & Rekomendasi Bisnis (Performa Pengiriman)"):
             st.write("""
             **Insight Analisis:**
-            - **Efisiensi Logistik:** Sebagian besar pesanan tiba dengan status **"Lebih Cepat"** dari tanggal estimasi yang dijanjikan kepada pelanggan. Ini menunjukkan bahwa sistem operasional dan logistik e-commerce berjalan dengan sangat efisien.
-            - **Kasus Keterlambatan:** Meskipun demikian, masih terdapat sejumlah pesanan yang berstatus **"Terlambat"**. Angka keterlambatan ini bisa menjadi acuan evaluasi bagi tim logistik atau pihak kurir rekanan agar tingkat kepuasan pelanggan (*Customer Satisfaction*) tetap terjaga.
+            - **Tingkat Ketepatan Waktu Tinggi:** Sebagian besar pesanan (mendominasi lebih dari 90%) tiba dengan status **"Lebih Cepat"** dari tanggal estimasi yang dijanjikan kepada pelanggan. Ini menunjukkan bahwa sistem operasional dan logistik e-commerce berjalan dengan sangat efisien.
+            - **Kasus Keterlambatan:** Meskipun demikian, masih terdapat sejumlah kecil pesanan yang berstatus **"Terlambat"**. Angka ini dapat menjadi acuan evaluasi bagi tim logistik atau pihak kurir rekanan agar tingkat kepuasan pelanggan (*Customer Satisfaction*) tetap terjaga.
             
             **Rekomendasi Action Item:**
-            - Lakukan evaluasi berkala terhadap rute pengiriman dan performa ekspedisi pada wilayah yang sering mengalami keterlambatan untuk menekan angka komplain pelanggan.
+            - **Evaluasi Ekspedisi:** Lakukan evaluasi berkala terhadap rute pengiriman dan performa ekspedisi pada wilayah yang sering mengalami keterlambatan untuk menekan angka komplain pelanggan.
             """)
     else:
         st.warning("Tidak ada data untuk kombinasi filter ini.")
